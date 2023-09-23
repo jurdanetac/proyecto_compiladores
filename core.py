@@ -19,25 +19,17 @@ from tkinter import messagebox
 # Variables ###################################################################
 
 # Crear ventana principal
-global root
 root: Tk = Tk()
 
 # Crear área principal de escritura de texto
-global textbox
 textbox = Text(root)
 
 # directorio del archivo
-global filedir
 filedir: Path = Path("archivos").resolve()
 
 # directorio del archivo
-global filename
 filename: StringVar = StringVar()
 filename.set(str(filedir / "Sin-titulo.txt"))
-
-# ruta del archivo
-# global filepath
-# filepath: Path = Path(filedir) / filename.get()
 
 ###############################################################################
 
