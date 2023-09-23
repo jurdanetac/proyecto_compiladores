@@ -128,6 +128,7 @@ def save_file(event) -> None:
 
 def setup_tk() -> tk.Tk:
     """Construye la app"""
+    root.wm_title("Preprocesador")
 
     # Crear título dinámico que indica qué archivo está abierto
     title = tk.Label(root, textvariable=filename)
