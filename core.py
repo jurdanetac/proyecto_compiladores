@@ -38,12 +38,13 @@ filename.set(str(filedir / "Sin-titulo.txt"))
 def open_file() -> None:
     """Abrir archivo"""
 
-    #
+    # Archivo a abrir
     file = filedialog.askopenfile(
         initialdir="archivos",
         filetypes=(("text files", "*.txt"), ("all files", "*.*")),
     )
 
+    # Si se seleccionó un archivo correctamente
     if file is not None:
         text = file.read()
 
@@ -55,7 +56,11 @@ def open_file() -> None:
 
 def new_file() -> None:
     """Nuevo archivo"""
+
+    # Actualizar nombre del archivo actual
     filename.set(str(filedir / "Sin-titulo.txt"))
+
+    # Vaciar editor
     textbox.delete(0.0, tk.END)
 
 
@@ -63,6 +68,7 @@ def new_file() -> None:
 def create_cascade(args: dict, menubar: tk.Menu) -> tk.Menu:
     """Crear submenu para la barra de menú principal"""
 
+    # Crear submenú
     cascade = tk.Menu(
         menubar,
         tearoff=0,
@@ -73,6 +79,7 @@ def create_cascade(args: dict, menubar: tk.Menu) -> tk.Menu:
         activeborderwidth=0,
     )
 
+    # Añadir opciones al submenú
     for entry, command in args.items():
         cascade.add_command(label=entry, command=command)
 
@@ -108,7 +115,7 @@ def save_file_as() -> None:
             messagebox.showerror(title="Oops", message="Error")
 
 
-def save_file() -> None:
+def save_file(event) -> None:
     """Wrapper para guardar archivo como"""
     text = textbox.get(0.0, tk.END)
 
@@ -119,7 +126,7 @@ def save_file() -> None:
         archivo.write(text)
 
 
-def create_tk() -> tk.Tk:
+def setup_tk() -> tk.Tk:
     """Construye la app"""
 
     # Crear título dinámico que indica qué archivo está abierto
@@ -129,6 +136,9 @@ def create_tk() -> tk.Tk:
     # Seleccionar todo el texto con Control + a/A
     textbox.bind("<Control-Key-a>", select_all)
     textbox.bind("<Control-Key-A>", select_all)
+    # Guardar con Control + s/S
+    textbox.bind("<Control-Key-s>", save_file)
+    textbox.bind("<Control-Key-S>", save_file)
     textbox.pack()
 
     root.geometry("800x500")  # dimensiones de la ventana
@@ -193,5 +203,5 @@ def create_tk() -> tk.Tk:
 ###############################################################################
 
 if __name__ == "__main__":
-    app: tk.Tk = create_tk()
+    app: tk.Tk = setup_tk()
     app.mainloop()
