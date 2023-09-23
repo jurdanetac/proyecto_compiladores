@@ -7,10 +7,9 @@ lenguaje de programación al momento de su compilación"""
 
 # Imports #####################################################################
 
-from pathlib import Path
-from tkinter import *
+import tkinter as tk
 
-from tkinter import simpledialog
+from pathlib import Path
 from tkinter import filedialog
 from tkinter import messagebox
 
@@ -19,16 +18,16 @@ from tkinter import messagebox
 # Variables ###################################################################
 
 # Crear ventana principal
-root: Tk = Tk()
+root: tk.Tk = tk.Tk()
 
 # Crear área principal de escritura de texto
-textbox = Text(root)
+textbox = tk.Text(root)
 
 # directorio del archivo
 filedir: Path = Path("archivos").resolve()
 
 # directorio del archivo
-filename: StringVar = StringVar()
+filename: tk.StringVar = tk.StringVar()
 filename.set(str(filedir / "Sin-titulo.txt"))
 
 ###############################################################################
@@ -37,28 +36,34 @@ filename.set(str(filedir / "Sin-titulo.txt"))
 
 
 def open_file() -> None:
-    f = filedialog.askopenfile(
+    """Abrir archivo"""
+
+    #
+    file = filedialog.askopenfile(
         initialdir="archivos",
         filetypes=(("text files", "*.txt"), ("all files", "*.*")),
     )
 
-    t = f.read()
+    if file is not None:
+        text = file.read()
 
-    textbox.delete(0.0, END)
-    textbox.insert(0.0, t)
+        textbox.delete(0.0, tk.END)
+        textbox.insert(0.0, text)
 
-    filename.set(f.name)
+        filename.set(file.name)
 
 
 def new_file() -> None:
     """Nuevo archivo"""
     filename.set(str(filedir / "Sin-titulo.txt"))
-    textbox.delete(0.0, END)
+    textbox.delete(0.0, tk.END)
 
 
 # Crear submenú con las entradas `args` y agregarlo a la barra menú
-def create_cascade(args: dict, menubar: Menu) -> Menu:
-    cascade = Menu(
+def create_cascade(args: dict, menubar: tk.Menu) -> tk.Menu:
+    """Crear submenu para la barra de menú principal"""
+
+    cascade = tk.Menu(
         menubar,
         tearoff=0,
         background="lightgray",
@@ -77,34 +82,35 @@ def create_cascade(args: dict, menubar: Menu) -> Menu:
 # https://stackoverflow.com/a/13808423
 # Seleccionar todo el texto en la caja de texto
 def select_all(event):
-    textbox.tag_add(SEL, "1.0", END)
-    textbox.mark_set(INSERT, "1.0")
-    textbox.see(INSERT)
+    textbox.tag_add(tk.SEL, "1.0", tk.END)
+    textbox.mark_set(tk.INSERT, "1.0")
+    textbox.see(tk.INSERT)
     return "break"
 
 
 def save_file_as() -> None:
-    text = textbox.get(0.0, END)
+    text = textbox.get(0.0, tk.END)
 
-    f = filedialog.asksaveasfile(
+    file = filedialog.asksaveasfile(
         initialdir="archivos",
         filetypes=(("text files", "*.txt"), ("all files", "*.*")),
         mode="w",
         defaultextension=".txt",
     )
 
-    try:
-        with open(f.name, "w") as archivo:
-            archivo.write(text)
+    if file is not None:
+        try:
+            with open(file.name, "w") as archivo:
+                archivo.write(text)
 
-        filename.set(f.name)
-    except:
-        messagebox.showerror(title="Oops", message="Error")
+            filename.set(file.name)
+        except:
+            messagebox.showerror(title="Oops", message="Error")
 
 
 def save_file() -> None:
     """Wrapper para guardar archivo como"""
-    text = textbox.get(0.0, END)
+    text = textbox.get(0.0, tk.END)
 
     # Guardar archivo
     Path(filedir).mkdir(exist_ok=True)  # crear directorio si no existe
@@ -113,11 +119,11 @@ def save_file() -> None:
         archivo.write(text)
 
 
-def create_tk() -> Tk:
+def create_tk() -> tk.Tk:
     """Construye la app"""
 
     # Crear título dinámico que indica qué archivo está abierto
-    title = Label(root, textvariable=filename)
+    title = tk.Label(root, textvariable=filename)
     title.pack()
 
     # Seleccionar todo el texto con Control + a/A
@@ -129,7 +135,7 @@ def create_tk() -> Tk:
     root.resizable(height=False, width=False)  # no redimension
 
     # Crear barra de menú
-    menubar = Menu(
+    menubar = tk.Menu(
         root,
         background="white",
         activebackground="lightblue",
@@ -187,5 +193,5 @@ def create_tk() -> Tk:
 ###############################################################################
 
 if __name__ == "__main__":
-    app: Tk = create_tk()
+    app: tk.Tk = create_tk()
     app.mainloop()
