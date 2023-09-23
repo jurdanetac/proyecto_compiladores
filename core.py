@@ -1,122 +1,199 @@
 #!/usr/bin/env python3
 
+"""Proyecto para la cátedra de 'Compiladores'. Consiste en un editor de
+texto el cual permita llevar a cabo los distintos análisis típicos de un
+lenguaje de programación al momento de su compilación"""
+
+
+# Imports #####################################################################
+
+from pathlib import Path
 from tkinter import *
-from tkinter import ttk
-from ttkthemes import ThemedTk
-import pyglet
+
+from tkinter import simpledialog
+from tkinter import filedialog
+from tkinter import messagebox
+
+###############################################################################
+
+# Variables ###################################################################
+
+# Crear ventana principal
+global root
+root: Tk = Tk()
+
+# Crear área principal de escritura de texto
+global textbox
+textbox = Text(root)
+
+# directorio del archivo
+global filedir
+filedir: Path = Path("archivos").resolve()
+
+# directorio del archivo
+global filename
+filename: StringVar = StringVar()
+filename.set(str(filedir / "Sin-titulo.txt"))
+
+# ruta del archivo
+# global filepath
+# filepath: Path = Path(filedir) / filename.get()
+
+###############################################################################
+
+# Functions ###################################################################
 
 
-pyglet.resource.add_font("jbm.ttf")
+def open_file() -> None:
+    f = filedialog.askopenfile(
+        initialdir="archivos",
+        filetypes=(("text files", "*.txt"), ("all files", "*.*")),
+    )
+
+    t = f.read()
+
+    textbox.delete(0.0, END)
+    textbox.insert(0.0, t)
+
+    filename.set(f.name)
 
 
-class App:
-    """Proyecto para la cátedra de 'Compiladores'. Consiste en un editor de
-    texto el cual permitirá llevar a cabo los distintos análisis típicos de un
-    lenguaje de programación al momento de su compilación"""
+def new_file() -> None:
+    """Nuevo archivo"""
+    filename.set(str(filedir / "Sin-titulo.txt"))
+    textbox.delete(0.0, END)
 
-    def __init__(self) -> None:
-        """Construye la app"""
-        # Crear ventana principal
-        self.root = ThemedTk(theme="black")
-        # Establecer dimensiones de la ventana
-        self.root.geometry("800x500")
-        self.root.resizable(height=False, width=False)
-        # Crear barra de menú
-        self.menubar = Menu(
-            self.root,
-            background="white",
-            activebackground="lightblue",
-            border=0,
-            relief="flat",
-            activeborderwidth=0,
-        )
 
-        # Anexar a la barra de menú submenu 'Archivo'
-        self.menubar.add_cascade(
-            menu=self.create_cascade(
-                {
-                    "Abrir": self.open_file,
-                    "Guardar": self.save_file,
-                    "Salir": exit,
-                }
-            ),
-            label="Archivo",
-        )
+# Crear submenú con las entradas `args` y agregarlo a la barra menú
+def create_cascade(args: dict, menubar: Menu) -> Menu:
+    cascade = Menu(
+        menubar,
+        tearoff=0,
+        background="lightgray",
+        activebackground="lightblue",
+        border=0,
+        relief="flat",
+        activeborderwidth=0,
+    )
 
-        # Anexar a la barra de menú submenu 'Análisis'
-        self.menubar.add_cascade(
-            menu=self.create_cascade(
-                {
-                    "Léxico": lambda: None,
-                    "Sintáctico": lambda: None,
-                    "Árbol": lambda: None,
-                }
-            ),
-            label="Análisis",
-        )
+    for entry, command in args.items():
+        cascade.add_command(label=entry, command=command)
 
-        # Anexar a la barra de menú submenu 'Ver'
-        self.menubar.add_cascade(
-            menu=self.create_cascade(
-                {
-                    "Tabla de símbolos": lambda: None,
-                    "Detección de errores": lambda: None,
-                }
-            ),
-            label="Ver",
-        )
+    return cascade
 
-        # Crear área principal de escritura de texto
-        self.textbox = Text(self.root, font=("JetBrains Mono", 16))
-        # Seleccionar todo el texto con Control + a/A
-        self.textbox.bind("<Control-Key-a>", self.select_all)
-        self.textbox.bind("<Control-Key-A>", self.select_all)
 
-        self.textbox.pack()
+# https://stackoverflow.com/a/13808423
+# Seleccionar todo el texto en la caja de texto
+def select_all(event):
+    textbox.tag_add(SEL, "1.0", END)
+    textbox.mark_set(INSERT, "1.0")
+    textbox.see(INSERT)
+    return "break"
 
-        # Configurar menú en la ventana
-        self.root.configure(menu=self.menubar)
 
-    # https://stackoverflow.com/a/13808423
-    # Seleccionar todo el texto en la caja de texto
-    def select_all(self, event):
-        self.textbox.tag_add(SEL, "1.0", END)
-        self.textbox.mark_set(INSERT, "1.0")
-        self.textbox.see(INSERT)
-        return "break"
+def save_file_as() -> None:
+    text = textbox.get(0.0, END)
 
-    # Crear submenú con las entradas `args` y agregarlo a la barra menú
-    def create_cascade(self, args: dict) -> Menu:
-        cascade = Menu(
-            self.menubar,
-            tearoff=0,
-            background="lightgray",
-            activebackground="lightblue",
-            border=0,
-            relief="flat",
-            activeborderwidth=0,
-        )
+    f = filedialog.asksaveasfile(
+        initialdir="archivos",
+        filetypes=(("text files", "*.txt"), ("all files", "*.*")),
+        mode="w",
+        defaultextension=".txt",
+    )
 
-        for entry, command in args.items():
-            cascade.add_command(label=entry, command=command)
+    try:
+        with open(f.name, "w") as archivo:
+            archivo.write(text)
 
-        return cascade
+        filename.set(f.name)
+    except:
+        messagebox.showerror(title="Oops", message="Error")
 
-    def open_file(self) -> None:
-        """Abrir archivo"""
-        # TODO
-        print("abrir")
 
-    def save_file(self) -> None:
-        """Guardar archivo"""
-        # TODO
-        print("guardar")
+def save_file() -> None:
+    """Wrapper para guardar archivo como"""
+    text = textbox.get(0.0, END)
 
-    def run(self) -> None:
-        """Ejecutar app"""
-        self.root.mainloop()
+    # Guardar archivo
+    Path(filedir).mkdir(exist_ok=True)  # crear directorio si no existe
 
+    with open(Path(filedir).resolve() / filename.get(), "w") as archivo:
+        archivo.write(text)
+
+
+def create_tk() -> Tk:
+    """Construye la app"""
+
+    # Crear título dinámico que indica qué archivo está abierto
+    title = Label(root, textvariable=filename)
+    title.pack()
+
+    # Seleccionar todo el texto con Control + a/A
+    textbox.bind("<Control-Key-a>", select_all)
+    textbox.bind("<Control-Key-A>", select_all)
+    textbox.pack()
+
+    root.geometry("800x500")  # dimensiones de la ventana
+    root.resizable(height=False, width=False)  # no redimension
+
+    # Crear barra de menú
+    menubar = Menu(
+        root,
+        background="white",
+        activebackground="lightblue",
+        border=0,
+        relief="flat",
+        activeborderwidth=0,
+    )
+
+    # Anexar a la barra de menú submenu 'Archivo'
+    menubar.add_cascade(
+        menu=create_cascade(
+            {
+                "Nuevo": new_file,
+                "Abrir": open_file,
+                "Guardar": save_file,
+                "Guardar Como": save_file_as,
+                "Salir": exit,
+            },
+            menubar,
+        ),
+        label="Archivo",
+    )
+
+    # Anexar a la barra de menú submenu 'Análisis'
+    menubar.add_cascade(
+        menu=create_cascade(
+            {
+                "Léxico": lambda: None,
+                "Sintáctico": lambda: None,
+                "Árbol": lambda: None,
+            },
+            menubar,
+        ),
+        label="Análisis",
+    )
+
+    # Anexar a la barra de menú submenu 'Ver'
+    menubar.add_cascade(
+        menu=create_cascade(
+            {
+                "Tabla de símbolos": lambda: None,
+                "Detección de errores": lambda: None,
+            },
+            menubar,
+        ),
+        label="Ver",
+    )
+
+    # Configurar menú en la ventana
+    root.configure(menu=menubar)
+
+    return root
+
+
+###############################################################################
 
 if __name__ == "__main__":
-    app = App()  # Crear app
-    app.run()  # Ejecutar
+    app: Tk = create_tk()
+    app.mainloop()
