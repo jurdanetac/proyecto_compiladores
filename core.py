@@ -88,7 +88,7 @@ def create_cascade(args: dict, menubar: tk.Menu) -> tk.Menu:
 
 # https://stackoverflow.com/a/13808423
 # Seleccionar todo el texto en la caja de texto
-def select_all(event):
+def select_all(event = None):
     textbox.tag_add(tk.SEL, "1.0", tk.END)
     textbox.mark_set(tk.INSERT, "1.0")
     textbox.see(tk.INSERT)
@@ -115,7 +115,7 @@ def save_file_as() -> None:
             messagebox.showerror(title="Oops", message="Error")
 
 
-def save_file(event) -> None:
+def save_file(event = None) -> None:
     """Wrapper para guardar archivo como"""
     text = textbox.get(0.0, tk.END)
 
